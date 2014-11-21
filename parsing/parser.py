@@ -23,7 +23,25 @@ class ClassObject(object):
         return "Class {}\nDefined functions: {}\nCalled functions: {}".format(self.name, self.functions, self.called_functions)
 
 
-class CallVisitor(ast.NodeVisitor):
+class FunctionObject(object):
+    def __init__(self):
+        self.name = ''
+        self.node = None
+        self.called_functions = []
+        self.calls = []
+
+    def visit(self):
+        visitor = CallVisitor()
+        visitor.visit(self.node)
+        self.calls = visitor.calls
+
+
+class ClassVisitor(ast.NodeVisitor):
+    def __init__(self, node):
+        self.node = node
+
+
+class CallInspector(ast.NodeVisitor):
     """ Within a call, a Name or Attribute will provide the function name currently in use
 
     Name vs. attribute:
@@ -40,6 +58,26 @@ class CallVisitor(ast.NodeVisitor):
         # todo: pull out item for the attr to determine whether node defines a classmethod
         self.identifier = node.attr
 
+        
+class CallVisitor(ast.NodeVisitor):
+    """ Find all calls present in the current scope and inspect them
+    """
+    def __init__(self):
+        self.defined_functions = set()
+        self.call_names = set()
+        self.calls = []
+
+    def continue_parsing(self, node):
+        super(CallVisitor, self).generic_visit(node)
+
+    def visit_Call(self, node):
+        call_visitor = CallInspector()
+        call_visitor.visit(node.func)
+        self.call_names.add(call_visitor.identifier)
+        self.calls.append(call_visitor.identifier)
+
+        self.continue_parsing(node)
+
 
 class FunctionVisitor(ast.NodeVisitor):
     """ Function definitions are where the function is defined, and the call is where the ast for that function exists
@@ -50,7 +88,6 @@ class FunctionVisitor(ast.NodeVisitor):
     def __init__(self):
         self.defined_functions = set()
         self.call_names = set()
-        self.last_defined_func = ''
         self.calls = {}
 
     def continue_parsing(self, node):
@@ -58,22 +95,11 @@ class FunctionVisitor(ast.NodeVisitor):
 
     def visit_FunctionDef(self, node):
         self.defined_functions.add(node.name)
-        self.last_defined_func = node.name
-        self.calls[node.name] = []
-        self.continue_parsing(node)
-
-    def visit_Expr(self, node):
-        self.continue_parsing(node)
-
-    def visit_Call(self, node):
-        # we're only looking at items contained in a function in a class
-        if self.last_defined_func:
-            # now visit each node using the call visitor
-            call_visitor = CallVisitor()
-            call_visitor.visit(node.func)
-            self.call_names.add(call_visitor.identifier)
-            self.calls[self.last_defined_func].append(call_visitor.identifier)
-
+        function_def = FunctionObject()
+        function_def.name = node.name
+        function_def.node = node
+        function_def.visit()
+        self.calls[function_def.name] = function_def.calls
         self.continue_parsing(node)
 
 
