@@ -14,7 +14,7 @@ class ClassObject(object):
         function_visitor.visit(self.node)
         self.functions = function_visitor.defined_functions
         self.called_functions = function_visitor.call_names
-        self.call_tree = function_visitor.calls
+        self.call_tree = dict(((self.name, k), v) for k, v in function_visitor.calls.iteritems())
 
     def __repr__(self):
         return "ClassObject {}".format(self.name)
