@@ -16,6 +16,22 @@ class ClassObject(object):
         self.called_functions = function_visitor.call_names
         self.call_tree = dict(((self.name, k), v) for k, v in function_visitor.calls.iteritems())
 
+    def remove_builtins(self):
+        """ For many classes, we may not want to include builtin functions in the graph.
+        Remove builtins from the call tree and from called functions list
+        """
+        new_call_tree = {}
+        for caller, call_list in self.call_tree.iteritems():
+            for call in call_list:
+                if __builtins__.has_key(call):
+                    continue
+                try:
+                    new_call_tree[caller].append(call)
+                except KeyError:
+                    new_call_tree[caller] = [call]
+
+        self.call_tree = new_call_tree
+
     def __repr__(self):
         return "ClassObject {}".format(self.name)
 
