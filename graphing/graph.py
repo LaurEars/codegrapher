@@ -12,20 +12,43 @@ class FunctionGrapher(object):
         self.nodes = set()
         self.edges = set()
 
-    def add_dict_to_graph(self, dictionary):
+    def add_dict_to_graph(self, class_names, dictionary):
         """ Creates a list of nodes and edges to be rendered
         Deduplicates input
         """
+        # todo: better handle project hierarchy by looking at imports
+
         # add nodes
         for origin in dictionary:
             self.nodes.add(origin)
             for destination in dictionary[origin]:
+                if destination in class_names:
+                    destination = (destination, '__init__')
                 self.nodes.add(destination)
                 
         # add edges
         for origin in dictionary:
             for destination in dictionary[origin]:
+                # if destination is a class name, it is a constructor
+                if destination in class_names:
+                    destination = (destination, '__init__')
                 self.edges.add((origin, destination))
+
+    def add_classes_to_graph(self, classes):
+        """ Adds classes with constructors to the set
+        This adds edges between a class constructor and the methods called on those items
+
+        Args:
+            classes: list of parser.ClassObject items
+        """
+        # todo: separate class methods from instance methods
+        for cls in classes:
+            if '__init__' in cls.functions:
+                self.nodes.add((cls.name, '__init__'))
+                for fcn in cls.functions:
+                    if fcn == '__init__':
+                        continue  # skip the case where init would refer back to itself
+                    self.edges.add(((cls.name, '__init__'), (cls.name, fcn)))
 
     def render(self, name=None):
         """ Renders the current graph
