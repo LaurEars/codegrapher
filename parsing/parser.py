@@ -122,6 +122,8 @@ class FunctionVisitor(ast.NodeVisitor):
 class FileVisitor(ast.NodeVisitor):
     def __init__(self):
         self.classes = []
+        self.import_alias = {}
+        self.import_module = {}  # for each import, store the module where it came from
 
     def continue_parsing(self, node):
         super(FileVisitor, self).generic_visit(node)
@@ -136,3 +138,16 @@ class FileVisitor(ast.NodeVisitor):
         new_class.visit()
         self.classes.append(new_class)
         self.continue_parsing(node)
+
+    def visit_Import(self, node):
+        for item in node.names:
+            asname = item.asname if item.asname else item.name
+            self.import_alias[asname] = item.name
+            self.import_module[asname] = None
+
+    def visit_ImportFrom(self, node):
+        module = node.module
+        for item in node.names:
+            asname = item.asname if item.asname else item.name
+            self.import_alias[asname] = item.name
+            self.import_module[asname] = module
