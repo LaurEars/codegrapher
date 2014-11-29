@@ -22,16 +22,16 @@ class FunctionGrapher(object):
         for origin in dictionary:
             self.nodes.add(origin)
             for destination in dictionary[origin]:
-                if destination in class_names:
-                    destination = (destination, '__init__')
+                if destination[0] in class_names:
+                    destination = (destination[0], '__init__')
                 self.nodes.add(destination)
 
         # add edges
         for origin in dictionary:
             for destination in dictionary[origin]:
                 # if destination is a class name, it is a constructor
-                if destination in class_names:
-                    destination = (destination, '__init__')
+                if destination[0] in class_names:
+                    destination = (destination[0], '__init__')
                 self.edges.add((origin, destination))
 
     def add_classes_to_graph(self, classes):

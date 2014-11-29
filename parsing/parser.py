@@ -26,7 +26,7 @@ class ClassObject(object):
         new_call_tree = {}
         for caller, call_list in self.call_tree.iteritems():
             for call in call_list:
-                if __builtins__.has_key(call):
+                if __builtins__.has_key(call[0]):
                     continue
                 try:
                     new_call_tree[caller].append(call)
@@ -68,6 +68,7 @@ class CallInspector(ast.NodeVisitor):
         object.attr(args)
     """
     def __init__(self):
+        self.module = ''
         self.identifier = ''
 
     def visit_Name(self, node):
@@ -75,6 +76,9 @@ class CallInspector(ast.NodeVisitor):
 
     def visit_Attribute(self, node):
         # todo: pull out item for the attr to determine whether node defines a classmethod
+        # currently does not handle multiple chaining of attr items
+        if hasattr(node.value, 'id'):
+            self.module = node.value.id
         self.identifier = node.attr
 
 
@@ -118,9 +122,11 @@ class CallVisitor(ImportVisitor):
         call_visitor = CallInspector()
         call_visitor.visit(node.func)
         self.call_names.add(call_visitor.identifier)
-        self.calls.append(call_visitor.identifier)
-
-        self.continue_parsing(node)
+        if call_visitor.module and call_visitor.module in self.aliases:
+            call = (call_visitor.module, call_visitor.identifier)
+        else:
+            call = (call_visitor.identifier,)
+        self.calls.append(call)
 
 
 class FunctionVisitor(ImportVisitor):
@@ -146,6 +152,7 @@ class FunctionVisitor(ImportVisitor):
         function_def.node = node
         function_def.visit()
         self.calls[function_def.name] = function_def.calls
+        self.functions.append(function_def)
 
 
 class FileVisitor(ImportVisitor):
