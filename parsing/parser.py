@@ -122,10 +122,31 @@ class CallVisitor(ImportVisitor):
         call_visitor = CallInspector()
         call_visitor.visit(node.func)
         self.call_names.add(call_visitor.identifier)
-        if call_visitor.module and call_visitor.module in self.aliases:
-            call = (call_visitor.module, call_visitor.identifier)
+
+        # if names are aliased, pull out aliased name
+        if call_visitor.identifier in self.aliases:
+            identifier = self.aliases[call_visitor.identifier]
         else:
-            call = (call_visitor.identifier,)
+            identifier = call_visitor.identifier
+
+        if call_visitor.module in self.modules:
+            # module is imported and called by attr
+            if self.modules[call_visitor.module]:
+                module = '.'.join([self.modules[call_visitor.module], self.aliases[call_visitor.module]])
+            else:
+                module = self.aliases[call_visitor.module]
+        elif call_visitor.identifier in self.modules:
+            # module is imported, but not called by attr
+            module = self.modules[call_visitor.identifier]
+        else:
+            # no module specified
+            module = None
+
+        if module:
+            call = (module, identifier)
+        else:
+            call = (identifier,)
+
         self.calls.append(call)
 
 
