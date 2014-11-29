@@ -15,7 +15,7 @@ class ClassObject(object):
     def visit(self):
         function_visitor = FunctionVisitor(aliases=self.aliases, modules=self.modules)
         function_visitor.visit(self.node)
-        self.functions = function_visitor.defined_functions
+        self.functions = function_visitor.functions
         self.called_functions = function_visitor.call_names
         self.call_tree = dict(((self.name, k), v) for k, v in function_visitor.calls.iteritems())
 
@@ -39,7 +39,8 @@ class ClassObject(object):
         return "ClassObject {}".format(self.name)
 
     def __str__(self):
-        return "Class {}\nDefined functions: {}\nCalled functions: {}".format(self.name, self.functions, self.called_functions)
+        functions = [fcn.name for fcn in self.functions]
+        return "Class {}\nDefined functions: {}\nCalled functions: {}".format(self.name, functions, self.called_functions)
 
 
 class FunctionObject(object):
@@ -131,6 +132,7 @@ class FunctionVisitor(ImportVisitor):
     def __init__(self, **kwargs):
         super(FunctionVisitor, self).__init__(**kwargs)
         self.defined_functions = set()
+        self.functions = []
         self.call_names = set()
         self.calls = {}
 

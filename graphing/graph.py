@@ -25,7 +25,7 @@ class FunctionGrapher(object):
                 if destination in class_names:
                     destination = (destination, '__init__')
                 self.nodes.add(destination)
-                
+
         # add edges
         for origin in dictionary:
             for destination in dictionary[origin]:
@@ -43,9 +43,10 @@ class FunctionGrapher(object):
         """
         # todo: separate class methods from instance methods
         for cls in classes:
-            if '__init__' in cls.functions:
+            functions = set(fcn.name for fcn in cls.functions)
+            if '__init__' in functions:
                 self.nodes.add((cls.name, '__init__'))
-                for fcn in cls.functions:
+                for fcn in functions:
                     if fcn == '__init__':
                         continue  # skip the case where init would refer back to itself
                     self.edges.add(((cls.name, '__init__'), (cls.name, fcn)))
