@@ -3,11 +3,11 @@ import copy
 
 
 class ClassObject(object):
-    def __init__(self, name, aliases=None, modules=None):
+    def __init__(self, node=None, aliases=None, modules=None):
         self.modules = copy.deepcopy(modules) if modules else {}
         self.aliases = copy.deepcopy(aliases) if aliases else {}
-        self.name = name
-        self.node = None
+        self.node = node
+        self.name = node.name if node else ''
         self.functions = []
         self.called_functions = []
         self.call_tree = {}
@@ -44,11 +44,11 @@ class ClassObject(object):
 
 
 class FunctionObject(object):
-    def __init__(self, aliases=None, modules=None):
+    def __init__(self, node=None, aliases=None, modules=None):
         self.modules = copy.deepcopy(modules) if modules else {}
         self.aliases = copy.deepcopy(aliases) if aliases else {}
-        self.name = ''
-        self.node = None
+        self.node = node
+        self.name = node.name if node else ''
         self.called_functions = []
         self.calls = []
 
@@ -168,9 +168,7 @@ class FunctionVisitor(ImportVisitor):
 
     def visit_FunctionDef(self, node):
         self.defined_functions.add(node.name)
-        function_def = FunctionObject(aliases=self.aliases, modules=self.modules)
-        function_def.name = node.name
-        function_def.node = node
+        function_def = FunctionObject(node=node, aliases=self.aliases, modules=self.modules)
         function_def.visit()
         self.calls[function_def.name] = function_def.calls
         self.functions.append(function_def)
@@ -189,7 +187,6 @@ class FileVisitor(ImportVisitor):
 
     def visit_ClassDef(self, node):
         # once a class is found, create a class object for it and traverse the ast with its visitor
-        new_class = ClassObject(node.name, aliases=self.aliases, modules=self.modules)
-        new_class.node = node
+        new_class = ClassObject(node=node, aliases=self.aliases, modules=self.modules)
         new_class.visit()
         self.classes.append(new_class)
