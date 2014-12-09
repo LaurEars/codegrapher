@@ -3,6 +3,17 @@ import copy
 
 
 class ClassObject(object):
+    """ Class for keeping track of classes in code
+
+    attributes:
+        modules: dict of current modules with alias: module_name, key:value pairs
+        aliases: dict of current modules with alias: original_name, key:value pairs
+        node (ast.AST): node for entire class
+        name (string): class name
+        functions (list): FunctionObject items defined in the current class
+        call_tree (dict): (module, FunctionObject.name): (module, identifier)
+
+    """
     def __init__(self, node=None, aliases=None, modules=None):
         self.modules = copy.deepcopy(modules) if modules else {}
         self.aliases = copy.deepcopy(aliases) if aliases else {}
@@ -44,6 +55,18 @@ class ClassObject(object):
 
 
 class FunctionObject(object):
+    """ Object that stores information within a single function definition
+
+    attributes:
+        modules: dict of current modules with alias: module_name, key:value pairs
+        aliases: dict of current modules with alias: original_name, key:value pairs
+        node (ast.AST): node for entire class
+        name (string): function name
+        called_functions (list): not currently used
+        calls (list): (module, identifier) items called within current node
+                      with with identifiers decoded form current alias, and modules expanded to their full import paths
+
+    """
     def __init__(self, node=None, aliases=None, modules=None):
         self.modules = copy.deepcopy(modules) if modules else {}
         self.aliases = copy.deepcopy(aliases) if aliases else {}
@@ -84,6 +107,11 @@ class CallInspector(ast.NodeVisitor):
 
 class ImportVisitor(ast.NodeVisitor):
     """ For import related calls, store the source modules and aliases used.
+    Designed to be inherited by other classes that need to know about imports in their current scope
+
+    attributes:
+        modules: dict of current modules with alias: module_name, key:value pairs
+        aliases: dict of current modules with alias: original_name, key:value pairs
     """
     def __init__(self, aliases=None, modules=None):
         self.modules = copy.deepcopy(modules) if modules else {}
@@ -108,6 +136,12 @@ class ImportVisitor(ast.NodeVisitor):
         
 class CallVisitor(ImportVisitor):
     """ Find all calls present in the current scope and inspect them
+
+    attributes:
+        defined_functions (set): not currently used
+        call_names (set): set of CallInspector.identifier items within current node
+        calls (list): (module, identifier) items called within current node
+                      with with identifiers decoded form current alias, and modules expanded to their full import paths
     """
     def __init__(self, **kwargs):
         super(CallVisitor, self).__init__(**kwargs)
@@ -155,6 +189,12 @@ class FunctionVisitor(ImportVisitor):
 
     This only looks for items that are called within the scope of a function, and associates those items
     with the function
+
+    attributes:
+        defined_functions (set): names of functions found by function visitor instance
+        functions (list): FunctionObject instances found by function visitor instance
+        call_names: not currently used
+        calls (dict): mapping from function names defined to calls within that function definition
     """
     def __init__(self, **kwargs):
         super(FunctionVisitor, self).__init__(**kwargs)
@@ -175,6 +215,11 @@ class FunctionVisitor(ImportVisitor):
 
 
 class FileVisitor(ImportVisitor):
+    """ First visitor that should be called on the file level.
+
+    attributes:
+        classes: list of ClassObject instances defined in the current file
+    """
     def __init__(self):
         super(FileVisitor, self).__init__()
         self.classes = []
