@@ -20,14 +20,12 @@ class ClassObject(object):
         self.node = node
         self.name = node.name if node else ''
         self.functions = []
-        self.called_functions = []
         self.call_tree = {}
 
     def visit(self):
         function_visitor = FunctionVisitor(aliases=self.aliases, modules=self.modules)
         function_visitor.visit(self.node)
         self.functions = function_visitor.functions
-        self.called_functions = function_visitor.call_names
         self.call_tree = dict(((self.name, k), v) for k, v in function_visitor.calls.iteritems())
 
     def remove_builtins(self):
@@ -51,7 +49,7 @@ class ClassObject(object):
 
     def __str__(self):
         functions = [fcn.name for fcn in self.functions]
-        return "Class {}\nDefined functions: {}\nCalled functions: {}".format(self.name, functions, self.called_functions)
+        return "Class {}\nDefined functions: {}".format(self.name, functions)
 
 
 class FunctionObject(object):
@@ -62,7 +60,6 @@ class FunctionObject(object):
         aliases: dict of current modules with alias: original_name, key:value pairs
         node (ast.AST): node for entire class
         name (string): function name
-        called_functions (list): not currently used
         calls (list): (module, identifier) items called within current node
                       with with identifiers decoded form current alias, and modules expanded to their full import paths
 
@@ -72,7 +69,6 @@ class FunctionObject(object):
         self.aliases = copy.deepcopy(aliases) if aliases else {}
         self.node = node
         self.name = node.name if node else ''
-        self.called_functions = []
         self.calls = []
 
     def visit(self):
@@ -138,14 +134,12 @@ class CallVisitor(ImportVisitor):
     """ Find all calls present in the current scope and inspect them
 
     attributes:
-        defined_functions (set): not currently used
         call_names (set): set of CallInspector.identifier items within current node
         calls (list): (module, identifier) items called within current node
                       with with identifiers decoded form current alias, and modules expanded to their full import paths
     """
     def __init__(self, **kwargs):
         super(CallVisitor, self).__init__(**kwargs)
-        self.defined_functions = set()
         self.call_names = set()
         self.calls = []
 
@@ -193,14 +187,12 @@ class FunctionVisitor(ImportVisitor):
     attributes:
         defined_functions (set): names of functions found by function visitor instance
         functions (list): FunctionObject instances found by function visitor instance
-        call_names: not currently used
         calls (dict): mapping from function names defined to calls within that function definition
     """
     def __init__(self, **kwargs):
         super(FunctionVisitor, self).__init__(**kwargs)
         self.defined_functions = set()
         self.functions = []
-        self.call_names = set()
         self.calls = {}
 
     def continue_parsing(self, node):
