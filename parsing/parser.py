@@ -1,5 +1,6 @@
 import ast
 import copy
+from pprint import pformat
 
 
 class ClassObject(object):
@@ -43,6 +44,11 @@ class ClassObject(object):
                     new_call_tree[caller] = [call]
 
         self.call_tree = new_call_tree
+
+    def pprint(self):
+        """ Pretty print formatter for class object
+        """
+        return pformat(self.call_tree)
 
     def __repr__(self):
         return "ClassObject {}".format(self.name)
