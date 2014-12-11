@@ -49,6 +49,47 @@ class StringCopier(object):
     assert string_class_object.aliases['dc'] == 'deepcopy'
 
 
+def test_import_module_call_alias_only():
+    code = '''
+import collections as coll
+
+class CounterCounter(object):
+    def __init__(self):
+        self.new_counter = coll.Counter()
+
+    def count(self, some_key):
+        self.new_counter[some_key] += 1
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    counting_class = visitor.classes[0]
+    assert ('CounterCounter', '__init__') in counting_class.call_tree
+    assert ('collections', 'Counter') in counting_class.call_tree[('CounterCounter', '__init__')]
+
+
+def test_import_module_alias_call_by_attr():
+    code = '''
+from itertools import chain
+
+class CounterCounter(object):
+    def __init__(self):
+        self.new_counter = coll.Counter()
+
+    def count(self, some_key):
+        self.new_counter[some_key] += 1
+
+    def repeat(self):
+        chain.from_iterable(['a', 'b', 'c'], ['1', '2', '3'])
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    counting_class = visitor.classes[0]
+    assert ('CounterCounter', 'repeat') in counting_class.call_tree
+    assert ('itertools.chain', 'from_iterable') in counting_class.call_tree[('CounterCounter', 'repeat')]
+
+
 def test_class_declaration():
     code = '''
 import ast
@@ -80,3 +121,55 @@ class StringCopier(object):
     visitor.visit(parsed_code)
     string_class_object = visitor.classes[0]
     assert 'copy' in (f.name for f in string_class_object.functions)
+
+
+def test_remove_builtins():
+    code = '''
+from copy import deepcopy as dc
+
+class StringCopier(object):
+    def __init__(self):
+        self.copied_strings = set()
+
+    def copy(self):
+        string1 = 'this'
+        string2 = dc(string1)
+        string1.add(string1)
+        return string2
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    string_class_object = visitor.classes[0]
+    assert ('StringCopier', '__init__') in string_class_object.call_tree
+    assert ('set',) in string_class_object.call_tree[('StringCopier', '__init__')]
+
+    string_class_object.remove_builtins()
+    assert ('StringCopier', '__init__') not in string_class_object.call_tree
+
+
+def test_init_call():
+    code = '''
+from copy import deepcopy as dc
+
+class StringCopier(object):
+    def __init__(self):
+        self.copied_strings = set()
+
+    def copy(self):
+        string1 = 'this'
+        string2 = dc(string1)
+        string1.add(string1)
+        return string2
+
+class DoSomething(object):
+    def something(self):
+        copier = StringCopier()
+        copied_string = copier.copy()
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    something_class = visitor.classes[1]
+    assert ('DoSomething', 'something') in something_class.call_tree
+    assert ('StringCopier',) in something_class.call_tree[('DoSomething', 'something')]
