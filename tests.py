@@ -1,4 +1,7 @@
 import ast
+
+from nose.tools import eq_
+
 from parsing.parser import FileVisitor
 
 
@@ -24,8 +27,8 @@ string2 = dc(string1)
     visitor.visit(parsed_code)
     assert 'dc' in visitor.modules
     assert 'dc' in visitor.aliases
-    assert visitor.modules['dc'] == 'copy'
-    assert visitor.aliases['dc'] == 'deepcopy'
+    eq_(visitor.modules['dc'], 'copy')
+    eq_(visitor.aliases['dc'], 'deepcopy')
 
 
 def test_import_deep_scope_dealiasing():
@@ -45,8 +48,8 @@ class StringCopier(object):
     string_class_object = visitor.classes[0]
     assert 'dc' in string_class_object.modules
     assert 'dc' in string_class_object.aliases
-    assert string_class_object.modules['dc'] == 'copy'
-    assert string_class_object.aliases['dc'] == 'deepcopy'
+    eq_(string_class_object.modules['dc'], 'copy')
+    eq_(string_class_object.aliases['dc'], 'deepcopy')
 
 
 def test_import_module_call_alias_only():
@@ -145,7 +148,7 @@ class StringCopier(object):
     assert ('set',) in string_class_object.call_tree[('StringCopier', '__init__')]
 
     string_class_object.remove_builtins()
-    assert string_class_object.call_tree[('StringCopier', '__init__')] == []
+    eq_(string_class_object.call_tree[('StringCopier', '__init__')], [])
 
 
 def test_init_call():
