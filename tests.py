@@ -145,7 +145,7 @@ class StringCopier(object):
     assert ('set',) in string_class_object.call_tree[('StringCopier', '__init__')]
 
     string_class_object.remove_builtins()
-    assert ('StringCopier', '__init__') not in string_class_object.call_tree
+    assert string_class_object.call_tree[('StringCopier', '__init__')] == []
 
 
 def test_init_call():

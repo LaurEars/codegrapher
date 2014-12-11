@@ -35,13 +35,13 @@ class ClassObject(object):
         """
         new_call_tree = {}
         for caller, call_list in self.call_tree.iteritems():
+            new_call_list = []
             for call in call_list:
                 if __builtins__.has_key(call[0]):
                     continue
-                try:
-                    new_call_tree[caller].append(call)
-                except KeyError:
-                    new_call_tree[caller] = [call]
+                else:
+                    new_call_list.append(call)
+            new_call_tree[caller] = new_call_list
 
         self.call_tree = new_call_tree
 
