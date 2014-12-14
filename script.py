@@ -36,5 +36,5 @@ def cli(code, printed, remove_builtins, output, output_format):
             graph.add_dict_to_graph(class_names, cls.call_tree)
         graph.add_classes_to_graph(visitor.classes)
         graph.name = output
-        graph.dot_file.format = output_format
+        graph.format = output_format
         graph.render()
