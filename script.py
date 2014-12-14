@@ -11,7 +11,8 @@ from parsing.parser import FileVisitor
 @click.option('--printed', default=False, is_flag=True, help='Pretty prints the call tree for each class in the file')
 @click.option('--remove-builtins', default=False, is_flag=True, help='Removes builtin functions from call trees')
 @click.option('--output', help='Graphviz output file name')
-def cli(code, printed, remove_builtins, output):
+@click.option('--output-format', default='pdf', help='File type for graphviz output file')
+def cli(code, printed, remove_builtins, output, output_format):
     """
     Parses a file.
     codegrapher [file_name]
@@ -35,4 +36,5 @@ def cli(code, printed, remove_builtins, output):
             graph.add_dict_to_graph(class_names, cls.call_tree)
         graph.add_classes_to_graph(visitor.classes)
         graph.name = output
+        graph.dot_file.format = output_format
         graph.render()
