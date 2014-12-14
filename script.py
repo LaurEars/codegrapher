@@ -20,11 +20,11 @@ def cli(code, printed, remove_builtins, output, output_format):
     parsed_code = ast.parse(code.read(), filename='code.py')
     visitor = FileVisitor()
     visitor.visit(parsed_code)
+    if remove_builtins:
+        visitor.remove_builtins()
     if printed:
         click.echo('Classes in file:')
         for class_object in visitor.classes:
-            if remove_builtins:
-                class_object.remove_builtins()
             click.echo('=' * 80)
             click.echo(class_object.name)
             click.echo(class_object.pprint())

@@ -233,3 +233,7 @@ class FileVisitor(ImportVisitor):
         new_class = ClassObject(node=node, aliases=self.aliases, modules=self.modules)
         new_class.visit()
         self.classes.append(new_class)
+
+    def remove_builtins(self):
+        for class_object in self.classes:
+            class_object.remove_builtins()
