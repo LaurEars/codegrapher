@@ -12,6 +12,14 @@ class FunctionGrapher(object):
         self.nodes = set()
         self.edges = set()
 
+    @property
+    def format(self):
+        return self.dot_file.format
+
+    @format.setter
+    def format(self, value):
+        self.dot_file.format = value
+
     def add_dict_to_graph(self, class_names, dictionary):
         """ Creates a list of nodes and edges to be rendered
         Deduplicates input

@@ -1,5 +1,6 @@
 import ast
 import copy
+from pprint import pformat
 
 
 class ClassObject(object):
@@ -34,15 +35,20 @@ class ClassObject(object):
         """
         new_call_tree = {}
         for caller, call_list in self.call_tree.iteritems():
+            new_call_list = []
             for call in call_list:
                 if __builtins__.has_key(call[0]):
                     continue
-                try:
-                    new_call_tree[caller].append(call)
-                except KeyError:
-                    new_call_tree[caller] = [call]
+                else:
+                    new_call_list.append(call)
+            new_call_tree[caller] = new_call_list
 
         self.call_tree = new_call_tree
+
+    def pprint(self):
+        """ Pretty print formatter for class object
+        """
+        return pformat(self.call_tree)
 
     def __repr__(self):
         return "ClassObject {}".format(self.name)
@@ -227,3 +233,7 @@ class FileVisitor(ImportVisitor):
         new_class = ClassObject(node=node, aliases=self.aliases, modules=self.modules)
         new_class.visit()
         self.classes.append(new_class)
+
+    def remove_builtins(self):
+        for class_object in self.classes:
+            class_object.remove_builtins()
