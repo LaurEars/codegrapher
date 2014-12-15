@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='codegrapher',
-    version='0.1.0',
+    version='0.1.1',
     description='Code that graphs code',
     url='http://github.com/LaurEars/codegrapher',
     author='Laura Rupprecht',
