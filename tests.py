@@ -3,7 +3,7 @@ import ast
 from nose.tools import eq_
 from click.testing import CliRunner
 
-from script import cli
+from cli.script import cli
 from parsing.parser import FileVisitor
 
 

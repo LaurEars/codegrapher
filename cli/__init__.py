@@ -1,1 +1,1 @@
-from script import cli
+from .script import cli
