@@ -19,3 +19,10 @@ An example of the current output of the parser parsing itself.
     :align: center
     :width: 600 px
     :alt: parser.py
+
+
+Installation
+------------
+
+.. code:: bash
+    pip install codegrapher
