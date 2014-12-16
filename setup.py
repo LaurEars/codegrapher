@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='codegrapher',
-    version='0.1.1',
+    version='0.1.2',
     description='Code that graphs code',
     url='http://github.com/LaurEars/codegrapher',
     author='Laura Rupprecht',
@@ -17,7 +17,7 @@ setup(
     tests_require=['nose'],
     entry_points='''
         [console_scripts]
-        codegrapher=script:cli
+        codegrapher=cli:cli
     ''',
     classifiers=[
         'Intended Audience :: Developers',
