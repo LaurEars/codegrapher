@@ -2,8 +2,8 @@ import ast
 
 import click
 
-from graphing.graph import FunctionGrapher
-from parsing.parser import FileVisitor
+from codegrapher.graph import FunctionGrapher
+from codegrapher.parser import FileVisitor
 
 
 @click.command()

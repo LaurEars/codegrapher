@@ -4,7 +4,7 @@ from nose.tools import eq_
 from click.testing import CliRunner
 
 from cli.script import cli
-from parsing.parser import FileVisitor
+from codegrapher.parser import FileVisitor
 
 
 def test_import_visitor():
