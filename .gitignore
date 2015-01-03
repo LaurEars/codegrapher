@@ -1,4 +1,5 @@
 .idea/
+codegrapher.egg-info
 *.pyc
 .coverage
 cover/
