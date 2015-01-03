@@ -31,10 +31,7 @@ def cli(code, printed, remove_builtins, output, output_format):
             click.echo('')
     if output:
         graph = FunctionGrapher()
-        class_names = set(cls.name for cls in visitor.classes)
-        for cls in visitor.classes:
-            graph.add_dict_to_graph(class_names, cls.call_tree)
-        graph.add_classes_to_graph(visitor.classes)
+        graph.add_visitor_to_graph(visitor)
         graph.name = output
         graph.format = output_format
         graph.render()

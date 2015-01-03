@@ -20,6 +20,14 @@ class FunctionGrapher(object):
     def format(self, value):
         self.dot_file.format = value
 
+    def add_visitor_to_graph(self, visitor):
+        """ When given a FileVisitor object, this adds all classes to the current graph
+        """
+        class_names = set(cls.name for cls in visitor.classes)
+        for cls in visitor.classes:
+            self.add_dict_to_graph(class_names, cls.call_tree)
+        self.add_classes_to_graph(visitor.classes)
+
     def add_dict_to_graph(self, class_names, dictionary):
         """ Creates a list of nodes and edges to be rendered
         Deduplicates input
