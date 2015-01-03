@@ -25,4 +25,25 @@ Installation
 ------------
 
 .. code:: bash
+
     pip install codegrapher
+
+
+To generate graphs, `graphviz <http://www.graphviz.org/Download.php>`_ must be installed.
+
+
+Usage
+-----
+
+To parse a file and output results to the console:
+
+.. code:: bash
+
+    codegrapher path/to/file.py --printed
+
+
+To parse a file and output results to a file:
+
+.. code:: bash
+
+    codegrapher path/to/file.py --output output_file_name --output-type png
