@@ -1,9 +1,11 @@
 from setuptools import setup, find_packages
 
+import codegrapher
+
 
 setup(
     name='codegrapher',
-    version='0.1.2',
+    version=codegrapher.__version__,
     description='Code that graphs code',
     url='http://github.com/LaurEars/codegrapher',
     author='Laura Rupprecht',
