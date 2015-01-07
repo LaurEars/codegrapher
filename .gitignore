@@ -3,6 +3,7 @@ codegrapher.egg-info
 *.pyc
 .coverage
 cover/
+dist/
 
 *.gv
 *.pdf
