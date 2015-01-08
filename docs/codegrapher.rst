@@ -9,7 +9,6 @@ codegrapher.graph module
 
 .. automodule:: codegrapher.graph
     :members:
-    :undoc-members:
     :show-inheritance:
 
 codegrapher.parser module
