@@ -2,6 +2,9 @@ from graphviz import Digraph
 
 
 class FilenameNotSpecifiedException(Exception):
+    """ An exception raised when a file name is not specified in a :class:`FunctionGrapher` instance before calling
+    :func:`FunctionGrapher.render` on it.
+    """
     pass
 
 
@@ -21,7 +24,11 @@ class FunctionGrapher(object):
         self.dot_file.format = value
 
     def add_visitor_to_graph(self, visitor):
-        """ When given a FileVisitor object, this adds all classes to the current graph
+        """ When given a :class:`codegrapher.parser.FileVisitor` object, this adds all classes to the current graph.
+
+        Arguments:
+            visitor (:class:`codegrapher.parser.FileVisitor`): Visitor objects to have all its classes added to the
+              current graph.
         """
         class_names = set(cls.name for cls in visitor.classes)
         for cls in visitor.classes:
@@ -29,8 +36,11 @@ class FunctionGrapher(object):
         self.add_classes_to_graph(visitor.classes)
 
     def add_dict_to_graph(self, class_names, dictionary):
-        """ Creates a list of nodes and edges to be rendered
-        Deduplicates input
+        """ Creates a list of nodes and edges to be rendered. Deduplicates input.
+
+        Arguments:
+            class_names (list): List of class names to be recognized by the graph as `class_name.__init__` nodes.
+            dictionary (dict): `ClassObject.call_tree` dict to be added to graph nodes and edges.
         """
         # todo: better handle project hierarchy by looking at imports
 
@@ -51,11 +61,11 @@ class FunctionGrapher(object):
                 self.edges.add((origin, destination))
 
     def add_classes_to_graph(self, classes):
-        """ Adds classes with constructors to the set
-        This adds edges between a class constructor and the methods called on those items
+        """ Adds classes with constructors to the set.
+        This adds edges between a class constructor and the methods called on those items.
 
-        Args:
-            classes: list of parser.ClassObject items
+        Arguments:
+            classes (list): list of :class:`codegrapher.parser.ClassObject` items.
         """
         # todo: separate class methods from instance methods
         for cls in classes:
@@ -68,8 +78,13 @@ class FunctionGrapher(object):
                     self.edges.add(((cls.name, '__init__'), (cls.name, fcn)))
 
     def render(self, name=None):
-        """ Renders the current graph
-        name (optional): filename to override self.name
+        """ Renders the current graph.
+
+        Arguments:
+            name (string): filename to override `self.name`.
+
+        Raises:
+            FilenameNotSpecifiedException: If `FunctionGrapher.name` is not specified.
         """
         for node in self.nodes:
             if isinstance(node, tuple):

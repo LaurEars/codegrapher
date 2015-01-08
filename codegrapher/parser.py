@@ -4,15 +4,15 @@ from pprint import pformat
 
 
 class ClassObject(object):
-    """ Class for keeping track of classes in code
+    """ Class for keeping track of classes in code.
 
-    attributes:
-        modules: dict of current modules with alias: module_name, key:value pairs
-        aliases: dict of current modules with alias: original_name, key:value pairs
-        node (ast.AST): node for entire class
-        name (string): class name
-        functions (list): FunctionObject items defined in the current class
-        call_tree (dict): (module, FunctionObject.name): (module, identifier)
+    Attributes:
+        modules (dict): dict of current modules with `alias: module_name`, `key:value pairs`.
+        aliases (dict): dict of current modules with `alias: original_name`, `key:value pairs`.
+        node (:mod:`ast.AST`): AST node for entire class.
+        name (string): Class name.
+        functions (list): :class:`FunctionObject` items defined in the current class.
+        call_tree (dict): dict with `key:value` pairs `(module, FunctionObject.name): (module, identifier)`.
 
     """
     def __init__(self, node=None, aliases=None, modules=None):
@@ -24,6 +24,10 @@ class ClassObject(object):
         self.call_tree = {}
 
     def visit(self):
+        """ Visits all the nodes within the current class AST node.
+
+        Updates `self.functions` and `self.call_tree` for the current instance.
+        """
         function_visitor = FunctionVisitor(aliases=self.aliases, modules=self.modules)
         function_visitor.visit(self.node)
         self.functions = function_visitor.functions
@@ -31,7 +35,7 @@ class ClassObject(object):
 
     def remove_builtins(self):
         """ For many classes, we may not want to include builtin functions in the graph.
-        Remove builtins from the call tree and from called functions list
+        Remove builtins from the call tree and from called functions list.
         """
         new_call_tree = {}
         for caller, call_list in self.call_tree.iteritems():
@@ -46,7 +50,10 @@ class ClassObject(object):
         self.call_tree = new_call_tree
 
     def pprint(self):
-        """ Pretty print formatter for class object
+        """ Pretty print formatter for class object.
+
+        Returns:
+            string
         """
         return pformat(self.call_tree)
 
@@ -62,12 +69,12 @@ class FunctionObject(object):
     """ Object that stores information within a single function definition
 
     attributes:
-        modules: dict of current modules with alias: module_name, key:value pairs
-        aliases: dict of current modules with alias: original_name, key:value pairs
-        node (ast.AST): node for entire class
-        name (string): function name
-        calls (list): (module, identifier) items called within current node
-                      with with identifiers decoded form current alias, and modules expanded to their full import paths
+        modules: dict of current modules with `alias: module_name`, `key:value pairs`.
+        aliases: dict of current modules with `alias: original_name`, `key:value pairs`.
+        node (:mod:`ast.AST`): AST node for entire function.
+        name (string): function name.
+        calls (list): `(module, identifier)` tuples describing items called within current node,
+                      with identifiers decoded form current alias, and modules expanded to their full import paths.
 
     """
     def __init__(self, node=None, aliases=None, modules=None):
@@ -78,6 +85,10 @@ class FunctionObject(object):
         self.calls = []
 
     def visit(self):
+        """ Visits all the nodes within the current function object's AST node.
+
+        Updates `self.calls`, `self.modules`, and `self.aliases` for the current instance.
+        """
         visitor = CallVisitor(aliases=self.aliases, modules=self.modules)
         visitor.visit(self.node)
         self.calls = visitor.calls
@@ -86,11 +97,10 @@ class FunctionObject(object):
 
 
 class CallInspector(ast.NodeVisitor):
-    """ Within a call, a Name or Attribute will provide the function name currently in use
+    """ Within a call, a Name or Attribute will provide the function name currently in use.
 
-    Name vs. attribute:
-        name(args)
-        object.attr(args)
+    Identifies `Name` nodes, which are called as ``name(args)``, and `Attribute` nodes, which are called as
+    ``object.attr(args)``
     """
     def __init__(self):
         self.module = ''
@@ -109,11 +119,11 @@ class CallInspector(ast.NodeVisitor):
 
 class ImportVisitor(ast.NodeVisitor):
     """ For import related calls, store the source modules and aliases used.
-    Designed to be inherited by other classes that need to know about imports in their current scope
+    Designed to be inherited by other classes that need to know about imports in their current scope.
 
-    attributes:
-        modules: dict of current modules with alias: module_name, key:value pairs
-        aliases: dict of current modules with alias: original_name, key:value pairs
+    Attributes:
+        modules (dict): dict of current modules with `alias: module_name`, `key:value pairs`.
+        aliases (dict): dict of current modules with `alias: original_name`, `key:value pairs`.
     """
     def __init__(self, aliases=None, modules=None):
         self.modules = copy.deepcopy(modules) if modules else {}
@@ -137,12 +147,12 @@ class ImportVisitor(ast.NodeVisitor):
 
         
 class CallVisitor(ImportVisitor):
-    """ Find all calls present in the current scope and inspect them
+    """ Finds all calls present in the current scope and inspect them.
 
-    attributes:
-        call_names (set): set of CallInspector.identifier items within current node
-        calls (list): (module, identifier) items called within current node
-                      with with identifiers decoded form current alias, and modules expanded to their full import paths
+    Attributes:
+        call_names (set): set of :class:`CallInspector.identifier` items within current AST node.
+        calls (list): `(module, identifier)` items called within current AST node,
+                      with identifiers decoded form current alias, and modules expanded to their full import paths.
     """
     def __init__(self, **kwargs):
         super(CallVisitor, self).__init__(**kwargs)
@@ -185,15 +195,15 @@ class CallVisitor(ImportVisitor):
 
 
 class FunctionVisitor(ImportVisitor):
-    """ Function definitions are where the function is defined, and the call is where the ast for that function exists
+    """ Function definitions are where the function is defined, and the call is where the ast for that function exists.
 
     This only looks for items that are called within the scope of a function, and associates those items
-    with the function
+    with the function.
 
-    attributes:
-        defined_functions (set): names of functions found by function visitor instance
-        functions (list): FunctionObject instances found by function visitor instance
-        calls (dict): mapping from function names defined to calls within that function definition
+    Attributes:
+        defined_functions (set): names of functions found by function visitor instance.
+        functions (list): :class:`FunctionObject` instances found by function visitor instance.
+        calls (dict): mapping from function names defined to calls within that function definition.
     """
     def __init__(self, **kwargs):
         super(FunctionVisitor, self).__init__(**kwargs)
@@ -215,8 +225,8 @@ class FunctionVisitor(ImportVisitor):
 class FileVisitor(ImportVisitor):
     """ First visitor that should be called on the file level.
 
-    attributes:
-        classes: list of ClassObject instances defined in the current file
+    Attributes:
+        classes (list): list of :class:`ClassObject` instances defined in the current file.
     """
     def __init__(self):
         super(FileVisitor, self).__init__()
@@ -235,5 +245,7 @@ class FileVisitor(ImportVisitor):
         self.classes.append(new_class)
 
     def remove_builtins(self):
+        """ Removes builtins from each class in a `FileVisitor` instance.
+        """
         for class_object in self.classes:
             class_object.remove_builtins()
