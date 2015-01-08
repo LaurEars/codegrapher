@@ -9,6 +9,15 @@ class FilenameNotSpecifiedException(Exception):
 
 
 class FunctionGrapher(object):
+    """ `FunctionGrapher` is a class for producing `graphviz <http://www.graphviz.org/>`_ graphs showing the call
+    graph for sets of classes.
+
+    Attributes:
+        name (string): Name to be used when a graph is made.
+        nodes (set): Graphviz nodes to be graphed.
+        edges (set): Directional edges connecting one node to another.
+        format (string): File format for graph. Default is `pdf`.
+    """
     def __init__(self):
         self.name = ''
         self.dot_file = Digraph()
