@@ -4,6 +4,7 @@ codegrapher.egg-info
 .coverage
 cover/
 dist/
+docs/_build/
 
 *.gv
 *.pdf
