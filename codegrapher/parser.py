@@ -40,6 +40,14 @@ class FileObject(object):
         for class_object in self.classes:
             class_object.remove_builtins()
 
+    def namespace(self):
+        """ Programmatically change the name of items in the call tree so they have relative path information
+        :return:
+        """
+        relative_namespace = self.name.split('.')[0].replace('/', '.')
+        for class_object in self.classes:
+            class_object.namespace(relative_namespace)
+
 
 class ClassObject(object):
     """ Class for keeping track of classes in code.
@@ -85,6 +93,12 @@ class ClassObject(object):
                     new_call_list.append(call)
             new_call_tree[caller] = new_call_list
 
+        self.call_tree = new_call_tree
+
+    def namespace(self, relative_namespace):
+        new_call_tree = {}
+        for caller in self.call_tree:
+            new_call_tree[('.'.join([relative_namespace, caller[0]]), caller[-1])] = self.call_tree[caller]
         self.call_tree = new_call_tree
 
     def pprint(self):
