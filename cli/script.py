@@ -1,9 +1,7 @@
-import ast
-
 import click
 
 from codegrapher.graph import FunctionGrapher
-from codegrapher.parser import FileVisitor
+from codegrapher.parser import FileObject
 
 
 @click.command()
@@ -17,21 +15,20 @@ def cli(code, printed, remove_builtins, output, output_format):
     Parses a file.
     codegrapher [file_name]
     """
-    parsed_code = ast.parse(code.read(), filename='code.py')
-    visitor = FileVisitor()
-    visitor.visit(parsed_code)
+    file_object = FileObject(code.name)
+    file_object.visit()
     if remove_builtins:
-        visitor.remove_builtins()
+        file_object.remove_builtins()
     if printed:
         click.echo('Classes in file:')
-        for class_object in visitor.classes:
+        for class_object in file_object.classes:
             click.echo('=' * 80)
             click.echo(class_object.name)
             click.echo(class_object.pprint())
             click.echo('')
     if output:
         graph = FunctionGrapher()
-        graph.add_visitor_to_graph(visitor)
+        graph.add_visitor_to_graph(file_object)
         graph.name = output
         graph.format = output_format
         graph.render()

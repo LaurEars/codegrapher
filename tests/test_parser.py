@@ -2,6 +2,7 @@ import ast
 
 from nose.tools import eq_
 from click.testing import CliRunner
+from click import echo
 
 from cli.script import cli
 from codegrapher.parser import FileVisitor
@@ -176,6 +177,34 @@ class DoSomething(object):
     visitor = FileVisitor()
     visitor.visit(parsed_code)
     something_class = visitor.classes[1]
+    assert ('DoSomething', 'something') in something_class.call_tree
+    assert ('StringCopier',) in something_class.call_tree[('DoSomething', 'something')]
+
+def test_multiple_files():
+    code = '''
+from copy import deepcopy as dc
+
+class StringCopier(object):
+    def __init__(self):
+        self.copied_strings = set()
+
+    def copy(self):
+        string1 = 'this'
+        string2 = dc(string1)
+        string1.add(string1)
+        return string2
+
+class DoSomething(object):
+    def something(self):
+        copier = StringCopier()
+        copied_string = copier.copy()
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    something_class = visitor.classes[1]
+    echo(something_class.pprint())
+    print something_class.pprint()
     assert ('DoSomething', 'something') in something_class.call_tree
     assert ('StringCopier',) in something_class.call_tree[('DoSomething', 'something')]
 

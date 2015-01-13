@@ -1,6 +1,44 @@
+import os
 import ast
 import copy
 from pprint import pformat
+
+
+class FileObject(object):
+    """ Class for keeping track of files.
+
+    Attributes:
+        modules (dict): dict of current modules with `alias: module_name`, `key:value pairs`.
+        aliases (dict): dict of current modules with `alias: original_name`, `key:value pairs`.
+        node (:mod:`ast.AST`): AST node for entire file.
+        name (string): File name.
+        classes (list): :class:`ClassObject` items defined in the current file.
+    """
+    def __init__(self, file_name, modules=None, aliases=None):
+        self.modules = copy.deepcopy(modules) if modules else {}
+        self.aliases = copy.deepcopy(aliases) if aliases else {}
+        self.name = file_name
+        self.full_path = os.path.abspath(file_name)
+        with open(self.full_path, 'r') as input_file:
+            self.node = ast.parse(input_file.read(), filename=self.name)
+        self.classes = []
+
+    def visit(self):
+        """ Visits all the nodes within the current file AST node.
+
+        Updates `self.classes` for the current instance.
+        """
+        file_visitor = FileVisitor(aliases=self.aliases, modules=self.modules)
+        file_visitor.visit(self.node)
+        self.modules = file_visitor.modules
+        self.aliases = file_visitor.aliases
+        self.classes = file_visitor.classes
+
+    def remove_builtins(self):
+        """ Removes builtins from each class in a `FileObject` instance.
+        """
+        for class_object in self.classes:
+            class_object.remove_builtins()
 
 
 class ClassObject(object):
@@ -228,8 +266,8 @@ class FileVisitor(ImportVisitor):
     Attributes:
         classes (list): list of :class:`ClassObject` instances defined in the current file.
     """
-    def __init__(self):
-        super(FileVisitor, self).__init__()
+    def __init__(self, **kwargs):
+        super(FileVisitor, self).__init__(**kwargs)
         self.classes = []
 
     def continue_parsing(self, node):
