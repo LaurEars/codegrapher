@@ -223,7 +223,7 @@ class StringCopier(object):
     code_result = '''Classes in file:
 ================================================================================
 StringCopier
-{('StringCopier', 'copy'): [('copy', 'deepcopy')]}
+{('code', 'StringCopier', 'copy'): [('copy', 'deepcopy')]}
 
 '''
     runner = CliRunner()
@@ -247,7 +247,7 @@ class StringCopier(object):
     code_result = '''Classes in file:
 ================================================================================
 StringCopier
-{('StringCopier', '__init__'): []}
+{('code', 'StringCopier', '__init__'): []}
 
 '''
     runner = CliRunner()
