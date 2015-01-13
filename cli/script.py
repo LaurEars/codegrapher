@@ -17,6 +17,7 @@ def cli(code, printed, remove_builtins, output, output_format):
     """
     file_object = FileObject(code.name)
     file_object.visit()
+    file_object.namespace()
     if remove_builtins:
         file_object.remove_builtins()
     if printed:

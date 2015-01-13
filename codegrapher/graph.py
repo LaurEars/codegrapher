@@ -39,12 +39,12 @@ class FunctionGrapher(object):
             visitor (:class:`codegrapher.parser.FileVisitor`): Visitor objects to have all its classes added to the
               current graph.
         """
-        class_names = set(cls.name for cls in visitor.classes)
+        class_namespace = dict((cls.name, visitor.relative_namespace) for cls in visitor.classes)
         for cls in visitor.classes:
-            self.add_dict_to_graph(class_names, cls.call_tree)
-        self.add_classes_to_graph(visitor.classes)
+            self.add_dict_to_graph(class_namespace, cls.call_tree, visitor.relative_namespace)
+        self.add_classes_to_graph(visitor.classes, visitor.relative_namespace)
 
-    def add_dict_to_graph(self, class_names, dictionary):
+    def add_dict_to_graph(self, class_names, dictionary, relative_namespace):
         """ Creates a list of nodes and edges to be rendered. Deduplicates input.
 
         Arguments:
@@ -52,13 +52,14 @@ class FunctionGrapher(object):
             dictionary (dict): `ClassObject.call_tree` dict to be added to graph nodes and edges.
         """
         # todo: better handle project hierarchy by looking at imports
-
         # add nodes
         for origin in dictionary:
             self.nodes.add(origin)
             for destination in dictionary[origin]:
                 if destination[0] in class_names:
-                    destination = (destination[0], '__init__')
+                    destination = (relative_namespace, destination[0], '__init__')
+                else:
+                    destination = (destination[0])
                 self.nodes.add(destination)
 
         # add edges
@@ -66,10 +67,12 @@ class FunctionGrapher(object):
             for destination in dictionary[origin]:
                 # if destination is a class name, it is a constructor
                 if destination[0] in class_names:
-                    destination = (destination[0], '__init__')
+                    destination = (relative_namespace, destination[0], '__init__')
+                else:
+                    destination = (destination[0])
                 self.edges.add((origin, destination))
 
-    def add_classes_to_graph(self, classes):
+    def add_classes_to_graph(self, classes, relative_namespace):
         """ Adds classes with constructors to the set.
         This adds edges between a class constructor and the methods called on those items.
 
@@ -80,11 +83,11 @@ class FunctionGrapher(object):
         for cls in classes:
             functions = set(fcn.name for fcn in cls.functions)
             if '__init__' in functions:
-                self.nodes.add((cls.name, '__init__'))
+                self.nodes.add((relative_namespace, cls.name, '__init__'))
                 for fcn in functions:
                     if fcn == '__init__':
                         continue  # skip the case where init would refer back to itself
-                    self.edges.add(((cls.name, '__init__'), (cls.name, fcn)))
+                    self.edges.add(((relative_namespace, cls.name, '__init__'), (relative_namespace, cls.name, fcn)))
 
     def render(self, name=None):
         """ Renders the current graph.

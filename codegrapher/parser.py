@@ -22,6 +22,7 @@ class FileObject(object):
         with open(self.full_path, 'r') as input_file:
             self.node = ast.parse(input_file.read(), filename=self.name)
         self.classes = []
+        self.relative_namespace = self.name.split('.')[0].replace('/', '.')
 
     def visit(self):
         """ Visits all the nodes within the current file AST node.
@@ -44,9 +45,9 @@ class FileObject(object):
         """ Programmatically change the name of items in the call tree so they have relative path information
         :return:
         """
-        relative_namespace = self.name.split('.')[0].replace('/', '.')
+
         for class_object in self.classes:
-            class_object.namespace(relative_namespace)
+            class_object.namespace(self.relative_namespace)
 
 
 class ClassObject(object):
@@ -98,7 +99,7 @@ class ClassObject(object):
     def namespace(self, relative_namespace):
         new_call_tree = {}
         for caller in self.call_tree:
-            new_call_tree[('.'.join([relative_namespace, caller[0]]), caller[-1])] = self.call_tree[caller]
+            new_call_tree[(relative_namespace, caller[0], caller[1])] = self.call_tree[caller]
         self.call_tree = new_call_tree
 
     def pprint(self):
