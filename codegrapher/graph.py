@@ -8,6 +8,29 @@ class FilenameNotSpecifiedException(Exception):
     pass
 
 
+class Node(object):
+    """ A class to more easily handle manipulations needed to properly display nodes in a graph.
+    Optimized to handle nodes that represent functions in a program.
+
+    Attributes:
+        tuple (tuple): Contains the namespace, class, and function name for the current node.
+    """
+    def __init__(self, input_node):
+        if isinstance(input_node, tuple):
+            self.tuple = input_node
+        else:
+            self.tuple = (input_node,)
+
+    @property
+    def represent(self):
+        """ Provides a string representation of the current node
+
+        Returns:
+            (string): Dotted form of current node, as in `namespace.class.function_name`.
+        """
+        return '.'.join(self.tuple)
+
+
 class FunctionGrapher(object):
     """ `FunctionGrapher` is a class for producing `graphviz <http://www.graphviz.org/>`_ graphs showing the call
     graph for sets of classes.
@@ -59,7 +82,7 @@ class FunctionGrapher(object):
                 if destination[0] in class_names:
                     destination = (relative_namespace, destination[0], '__init__')
                 else:
-                    destination = (destination[0])
+                    destination = destination
                 self.nodes.add(destination)
 
         # add edges
@@ -69,7 +92,7 @@ class FunctionGrapher(object):
                 if destination[0] in class_names:
                     destination = (relative_namespace, destination[0], '__init__')
                 else:
-                    destination = (destination[0])
+                    destination = destination
                 self.edges.add((origin, destination))
 
     def add_classes_to_graph(self, classes, relative_namespace):
@@ -99,22 +122,9 @@ class FunctionGrapher(object):
             FilenameNotSpecifiedException: If `FunctionGrapher.name` is not specified.
         """
         for node in self.nodes:
-            if isinstance(node, tuple):
-                self.dot_file.node('.'.join(node), '.'.join(node))
-            else:
-                self.dot_file.node(node)
+            self.dot_file.node(Node(node).represent)
         for edge in self.edges:
-
-            new_edge = []
-            if isinstance(edge[0], tuple):
-                new_edge.append('.'.join(edge[0]))
-            else:
-                new_edge.append(edge[0])
-            if isinstance(edge[1], tuple):
-                new_edge.append('.'.join(edge[1]))
-            else:
-                new_edge.append(edge[1])
-            self.dot_file.edge(*new_edge)
+            self.dot_file.edge(Node(edge[0]).represent, Node(edge[1]).represent)
         if name is None:
             if not self.name:
                 raise FilenameNotSpecifiedException
