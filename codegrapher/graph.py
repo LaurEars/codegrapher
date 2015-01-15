@@ -30,6 +30,18 @@ class Node(object):
         """
         return '.'.join(self.tuple)
 
+    def __str__(self):
+        return '.'.join(self.tuple)
+
+    def __repr__(self):
+        return "<Node: {}>".format(self.tuple)
+
+    def __hash__(self):
+        return hash('.'.join(self.tuple))
+
+    def __eq__(self, other):
+        return self.tuple == other.tuple
+
 
 class FunctionGrapher(object):
     """ `FunctionGrapher` is a class for producing `graphviz <http://www.graphviz.org/>`_ graphs showing the call
@@ -77,12 +89,12 @@ class FunctionGrapher(object):
         # todo: better handle project hierarchy by looking at imports
         # add nodes
         for origin in dictionary:
-            self.nodes.add(origin)
+            self.nodes.add(Node(origin))
             for destination in dictionary[origin]:
                 if destination[0] in class_names:
-                    destination = (relative_namespace, destination[0], '__init__')
+                    destination = Node((relative_namespace, destination[0], '__init__'))
                 else:
-                    destination = destination
+                    destination = Node(destination)
                 self.nodes.add(destination)
 
         # add edges
@@ -93,7 +105,7 @@ class FunctionGrapher(object):
                     destination = (relative_namespace, destination[0], '__init__')
                 else:
                     destination = destination
-                self.edges.add((origin, destination))
+                self.edges.add((Node(origin), Node(destination)))
 
     def add_classes_to_graph(self, classes, relative_namespace):
         """ Adds classes with constructors to the set.
@@ -106,11 +118,12 @@ class FunctionGrapher(object):
         for cls in classes:
             functions = set(fcn.name for fcn in cls.functions)
             if '__init__' in functions:
-                self.nodes.add((relative_namespace, cls.name, '__init__'))
+                self.nodes.add(Node((relative_namespace, cls.name, '__init__')))
                 for fcn in functions:
                     if fcn == '__init__':
                         continue  # skip the case where init would refer back to itself
-                    self.edges.add(((relative_namespace, cls.name, '__init__'), (relative_namespace, cls.name, fcn)))
+                    self.edges.add((Node((relative_namespace, cls.name, '__init__')),
+                                    Node((relative_namespace, cls.name, fcn))))
 
     def render(self, name=None):
         """ Renders the current graph.
@@ -122,9 +135,9 @@ class FunctionGrapher(object):
             FilenameNotSpecifiedException: If `FunctionGrapher.name` is not specified.
         """
         for node in self.nodes:
-            self.dot_file.node(Node(node).represent)
+            self.dot_file.node(node.represent)
         for edge in self.edges:
-            self.dot_file.edge(Node(edge[0]).represent, Node(edge[1]).represent)
+            self.dot_file.edge(edge[0].represent, edge[1].represent)
         if name is None:
             if not self.name:
                 raise FilenameNotSpecifiedException
