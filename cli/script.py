@@ -45,10 +45,10 @@ def cli(code, recursive, printed, remove_builtins, output, output_format):
                 click.echo('')
         if output:
             try:
-                graph.add_visitor_to_graph(file_object)
+                graph.add_file_to_graph(file_object)
             except AttributeError:
                 graph = FunctionGrapher()
-                graph.add_visitor_to_graph(file_object)
+                graph.add_file_to_graph(file_object)
     if output:
         graph.name = output
         graph.format = output_format

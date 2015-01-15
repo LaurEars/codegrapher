@@ -67,17 +67,17 @@ class FunctionGrapher(object):
     def format(self, value):
         self.dot_file.format = value
 
-    def add_visitor_to_graph(self, visitor):
-        """ When given a :class:`codegrapher.parser.FileVisitor` object, this adds all classes to the current graph.
+    def add_file_to_graph(self, file_object):
+        """ When given a :class:`codegrapher.parser.FileObject` object, this adds all classes to the current graph.
 
         Arguments:
-            visitor (:class:`codegrapher.parser.FileVisitor`): Visitor objects to have all its classes added to the
+            file_object (:class:`codegrapher.parser.FileObject`): Visitor objects to have all its classes added to the
               current graph.
         """
-        class_namespace = dict((cls.name, visitor.relative_namespace) for cls in visitor.classes)
-        for cls in visitor.classes:
-            self.add_dict_to_graph(class_namespace, cls.call_tree, visitor.relative_namespace)
-        self.add_classes_to_graph(visitor.classes, visitor.relative_namespace)
+        class_namespace = dict((cls.name, file_object.relative_namespace) for cls in file_object.classes)
+        for cls in file_object.classes:
+            self.add_dict_to_graph(class_namespace, cls.call_tree, file_object.relative_namespace)
+        self.add_classes_to_graph(file_object.classes, file_object.relative_namespace)
 
     def add_dict_to_graph(self, class_names, dictionary, relative_namespace):
         """ Creates a list of nodes and edges to be rendered. Deduplicates input.
