@@ -220,7 +220,7 @@ class StringCopier(object):
         string2 = dc(string1)
         return string2
 '''
-    code_result = '''Classes in file:
+    code_result = '''Classes in file code.py:
 ================================================================================
 StringCopier
 {('code', 'StringCopier', 'copy'): [('copy', 'deepcopy')]}
@@ -244,7 +244,7 @@ class StringCopier(object):
     def __init__(self):
         self.copied_strings = set()
 '''
-    code_result = '''Classes in file:
+    code_result = '''Classes in file code.py:
 ================================================================================
 StringCopier
 {('code', 'StringCopier', '__init__'): []}
