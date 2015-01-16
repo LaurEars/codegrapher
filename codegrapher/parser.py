@@ -34,6 +34,7 @@ class FileObject(object):
         self.modules = file_visitor.modules
         self.aliases = file_visitor.aliases
         self.classes = file_visitor.classes
+        self.namespace()
 
     def remove_builtins(self):
         """ Removes builtins from each class in a `FileObject` instance.

@@ -33,7 +33,6 @@ def cli(code, recursive, printed, remove_builtins, output, output_format):
     for file_name in file_list:
         file_object = FileObject(file_name)
         file_object.visit()
-        file_object.namespace()
         if remove_builtins:
             file_object.remove_builtins()
         if printed:
