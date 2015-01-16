@@ -17,7 +17,10 @@ class Node(object):
     """
     def __init__(self, input_node):
         if isinstance(input_node, tuple):
-            self.tuple = input_node
+            if input_node[0] == '':
+                self.tuple = input_node[1:-1]
+            else:
+                self.tuple = input_node
         else:
             self.tuple = (input_node,)
 
