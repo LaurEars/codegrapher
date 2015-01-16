@@ -50,6 +50,13 @@ To parse a file and output results to a file:
 
     codegrapher path/to/file.py --output output_file_name --output-type png
 
+To analyze a directory of files, along with all files it contains:
+
+.. code:: bash
+
+    codegrapher -r path/to/directory --output multiple_file_analysis
+
+
 As a Python module
 ~~~~~~~~~~~~~~~~~~
 
@@ -57,9 +64,22 @@ To easily parse code in Python :
 
 .. code:: python
 
-    from codegrapher.parser import FileVisitor
-    
-    with open('path/to/file.py', 'r') as input_file:
-        parsed_code = ast.parse(code.read())
-    visitor = FileVisitor()
-    visitor.visit(parsed_code)
+    from codegrapher.parser import FileObject
+
+    file_object = FileObject('path/to/file.py')
+    file_object.visit()
+
+And then to add that code to a graph and render it (using graphviz):
+
+.. code:: python
+
+    from codegrapher.graph import FunctionGrapher
+
+    graph = FunctionGrapher()
+    graph.add_file_to_graph(file_object)
+    graph.name = 'name.gv'
+    graph.format = 'png'
+    graph.render()
+
+Which will produce your code as a png file, `name.gv.png`, along with a
+`dot file <http://en.wikipedia.org/wiki/DOT_%28graph_description_language%29>`_ `name.gv`
