@@ -22,6 +22,7 @@ setup(
         codegrapher=cli:cli
     ''',
     classifiers=[
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
