@@ -129,6 +129,8 @@ class FunctionObject(object):
         name (string): function name.
         calls (list): `(module, identifier)` tuples describing items called within current node,
                       with identifiers decoded form current alias, and modules expanded to their full import paths.
+        decorator_list (list): list of decorators, by name as a string, applied to the current function definition.
+        is_classmethod (bool): True if the current function is designated as a classmethod by a decorator.
 
     """
     def __init__(self, node=None, aliases=None, modules=None):
