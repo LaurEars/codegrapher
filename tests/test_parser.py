@@ -129,6 +129,28 @@ class StringCopier(object):
     assert 'copy' in (f.name for f in string_class_object.functions)
 
 
+def test_classmethod_function_declaration():
+    code = '''
+import ast
+from copy import deepcopy as dc
+
+class StringCopier(object):
+    def copy(self):
+        string1 = 'this'
+        string2 = dc(string1)
+        return string2
+
+    @classmethod
+    def print_hello(cls):
+        print "hello!"
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    string_class_object = visitor.classes[0]
+    assert string_class_object.functions[1].is_classmethod
+
+
 def test_remove_builtins():
     code = '''
 from copy import deepcopy as dc
