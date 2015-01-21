@@ -116,17 +116,32 @@ class FunctionGrapher(object):
 
         Arguments:
             classes (list): list of :class:`codegrapher.parser.ClassObject` items.
+            relative_namespace (string): namespace of the current class.
         """
-        # todo: separate class methods from instance methods
         for cls in classes:
-            functions = set(fcn.name for fcn in cls.functions)
-            if '__init__' in functions:
+            # If a class is here, add it as a node
+            self.nodes.add(Node((relative_namespace, cls.name)))
+
+            if not all((fcn.is_classmethod for fcn in cls.functions)):
+                # for case where there is at least one non-classmethod, assume implied (or explicit) __init__
+
+                # make a node between the class name and __init__
                 self.nodes.add(Node((relative_namespace, cls.name, '__init__')))
-                for fcn in functions:
-                    if fcn == '__init__':
-                        continue  # skip the case where init would refer back to itself
-                    self.edges.add((Node((relative_namespace, cls.name, '__init__')),
-                                    Node((relative_namespace, cls.name, fcn))))
+                self.edges.add((Node((relative_namespace, cls.name)), Node((relative_namespace, cls.name, '__init__'))))
+                for fcn in cls.functions:
+                    # skip classmethods and case where init would refer back to itself
+                    if not fcn.is_classmethod and not fcn.name == '__init__':
+                        self.edges.add((Node((relative_namespace, cls.name, '__init__')),
+                                        Node((relative_namespace, cls.name, fcn.name))))
+                    elif fcn.is_classmethod:
+                        self.edges.add((Node((relative_namespace, cls.name)),
+                                        Node((relative_namespace, cls.name, fcn.name))))
+
+            else:
+                # for the case where there are only classmethods defined
+                for fcn in cls.functions:
+                    self.edges.add((Node((relative_namespace, cls.name)),
+                                    Node((relative_namespace, cls.name, fcn.name))))
 
     def render(self, name=None):
         """ Renders the current graph.
