@@ -137,6 +137,8 @@ class FunctionObject(object):
         self.node = node
         self.name = node.name if node else ''
         self.calls = []
+        self.decorator_list = []
+        self.is_classmethod = False
 
     def visit(self):
         """ Visits all the nodes within the current function object's AST node.
@@ -145,6 +147,9 @@ class FunctionObject(object):
         """
         visitor = CallVisitor(aliases=self.aliases, modules=self.modules)
         visitor.visit(self.node)
+        self.decorator_list = [decorator.id for decorator in self.node.decorator_list]
+        if 'classmethod' in self.decorator_list:
+            self.is_classmethod = True
         self.calls = visitor.calls
         self.modules.update(visitor.modules)
         self.aliases.update(visitor.aliases)
