@@ -23,6 +23,7 @@ class FileObject(object):
             self.node = ast.parse(input_file.read(), filename=self.name)
         self.classes = []
         self.relative_namespace = self.name.split('.')[0].replace('/', '.')
+        self.ignore = set()
 
     def visit(self):
         """ Visits all the nodes within the current file AST node.
@@ -41,6 +42,19 @@ class FileObject(object):
         """
         for class_object in self.classes:
             class_object.remove_builtins()
+
+    def add_ignore_file(self):
+        """ Use a file `.cg_ignore` to ignore a list of functions from the call graph
+        """
+        if os.path.isfile('.cg_ignore'):
+            with open('.cg_ignore', 'r') as ignore_file:
+                for line in ignore_file:
+                    if line.strip() and line.strip()[0] != '#':
+                        self.ignore.add(line.strip())
+
+    def ignore_functions(self):
+        for class_object in self.classes:
+            class_object.ignore_functions(self.ignore)
 
     def namespace(self):
         """ Programmatically change the name of items in the call tree so they have relative path information
@@ -92,6 +106,17 @@ class ClassObject(object):
                 if __builtins__.has_key(call[0]):
                     continue
                 else:
+                    new_call_list.append(call)
+            new_call_tree[caller] = new_call_list
+
+        self.call_tree = new_call_tree
+
+    def ignore_functions(self, ignore_set):
+        new_call_tree = {}
+        for caller, call_list in self.call_tree.iteritems():
+            new_call_list = []
+            for call in call_list:
+                if call[-1] not in ignore_set:
                     new_call_list.append(call)
             new_call_tree[caller] = new_call_list
 
