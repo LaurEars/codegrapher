@@ -176,6 +176,31 @@ class StringCopier(object):
     eq_(string_class_object.call_tree[('StringCopier', '__init__')], [])
 
 
+def test_class_object_ignore_functions():
+    code = '''
+from copy import deepcopy as dc
+
+class StringCopier(object):
+    def __init__(self):
+        self.copied_strings = set()
+
+    def copy(self):
+        string1 = 'this'
+        string2 = dc(string1)
+        string1.add(string1)
+        return string2
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    string_class_object = visitor.classes[0]
+    assert ('StringCopier', 'copy') in string_class_object.call_tree
+    assert ('add',) in string_class_object.call_tree[('StringCopier', 'copy')]
+
+    string_class_object.ignore_functions(({'add'}))
+    assert ('add',) not in string_class_object.call_tree[('StringCopier', 'copy')]
+
+
 def test_init_call():
     code = '''
 from copy import deepcopy as dc
@@ -201,6 +226,7 @@ class DoSomething(object):
     something_class = visitor.classes[1]
     assert ('DoSomething', 'something') in something_class.call_tree
     assert ('StringCopier',) in something_class.call_tree[('DoSomething', 'something')]
+
 
 def test_multiple_files():
     code = '''
