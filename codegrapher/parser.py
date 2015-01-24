@@ -251,6 +251,16 @@ class CallVisitor(ImportVisitor):
     def visit_Call(self, node):
         call_visitor = CallInspector()
         call_visitor.visit(node.func)
+
+        # handles calls within function calls
+        for arg in node.args:
+            self.continue_parsing(arg)
+            if isinstance(arg, ast.Call):
+                arg_visitor = CallVisitor(aliases=self.aliases, modules=self.modules)
+                arg_visitor.visit(arg)
+                self.call_names.update(arg_visitor.call_names)
+                self.calls.extend(arg_visitor.calls)
+
         self.call_names.add(call_visitor.identifier)
 
         # if names are aliased, pull out aliased name

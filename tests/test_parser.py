@@ -228,6 +228,34 @@ class DoSomething(object):
     assert ('StringCopier',) in something_class.call_tree[('DoSomething', 'something')]
 
 
+def test_nested_functions():
+    code = '''
+from copy import deepcopy as dc
+
+class StringCopier(object):
+    def __init__(self):
+        self.copied_strings = set()
+
+    def copysomething(self, something):
+        string1 = something
+        string2 = dc(string1)
+        string1.add(string1)
+        return string2
+
+class DoSomething(object):
+    def something(self):
+        copier = StringCopier()
+        copied_string = copier.copy()
+        copier.copysomething('something'.upper())
+'''
+    parsed_code = ast.parse(code, filename='code.py')
+    visitor = FileVisitor()
+    visitor.visit(parsed_code)
+    something_class = visitor.classes[1]
+    assert ('DoSomething', 'something') in something_class.call_tree
+    assert ('upper',) in something_class.call_tree[('DoSomething', 'something')]
+
+
 def test_multiple_files():
     code = '''
 from copy import deepcopy as dc
