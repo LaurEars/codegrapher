@@ -25,7 +25,7 @@ class FileObject(object):
         with open(self.full_path, 'r') as input_file:
             self.node = ast.parse(input_file.read(), filename=self.name)
         self.classes = []
-        self.relative_namespace = self.name.split('.')[0].replace('/', '.')
+        self.relative_namespace = os.path.splitext(self.name)[0].replace(os.path.sep, '.')
         self.ignore = set()
 
     def visit(self):
