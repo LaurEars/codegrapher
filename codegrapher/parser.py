@@ -167,6 +167,24 @@ class FunctionObject(object):
         self.decorator_list = []
         self.is_classmethod = False
 
+    @classmethod
+    def _extract_decorators(cls, node):
+        """ Pulls out strings for each item in a decorator list on a FunctionDef node
+
+        Args:
+            node (:mod:`ast.AST`): Node from which `decorator_list` will be extracted
+        Returns:
+            (list): List of decorator strings
+        """
+        decorator_list = []
+        for decorator in node.decorator_list:
+            if isinstance(decorator, ast.Name):
+                decorator_list.append(decorator.id)
+            elif isinstance(decorator, ast.Attribute):
+                # this catches things like attr.setter
+                decorator_list.append('.'.join([decorator.attr, decorator.value.id]))
+        return decorator_list
+
     def visit(self):
         """ Visits all the nodes within the current function object's AST node.
 
@@ -174,7 +192,7 @@ class FunctionObject(object):
         """
         visitor = CallVisitor(aliases=self.aliases, modules=self.modules)
         visitor.visit(self.node)
-        self.decorator_list = [decorator.id for decorator in self.node.decorator_list]
+        self.decorator_list = FunctionObject._extract_decorators(self.node)
         if 'classmethod' in self.decorator_list:
             self.is_classmethod = True
         self.calls = visitor.calls
