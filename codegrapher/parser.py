@@ -13,6 +13,9 @@ class FileObject(object):
         node (:mod:`ast.AST`): AST node for entire file.
         name (string): File name.
         classes (list): :class:`ClassObject` items defined in the current file.
+        relative_namespace (string): The namespace for the current file,
+            taken from the relative path of the current file
+        ignore (set): Functions to be ignored, as defined in a `.cg_ignore` text file.
     """
     def __init__(self, file_name, modules=None, aliases=None):
         self.modules = copy.deepcopy(modules) if modules else {}
@@ -22,7 +25,7 @@ class FileObject(object):
         with open(self.full_path, 'r') as input_file:
             self.node = ast.parse(input_file.read(), filename=self.name)
         self.classes = []
-        self.relative_namespace = self.name.split('.')[0].replace('/', '.')
+        self.relative_namespace = os.path.splitext(self.name)[0].replace(os.path.sep, '.')
         self.ignore = set()
 
     def visit(self):
@@ -53,12 +56,13 @@ class FileObject(object):
                         self.ignore.add(line.strip())
 
     def ignore_functions(self):
+        """ Ignore all functions in the current class which are present in the instance's `ignore` attribute.
+        """
         for class_object in self.classes:
             class_object.ignore_functions(self.ignore)
 
     def namespace(self):
         """ Programmatically change the name of items in the call tree so they have relative path information
-        :return:
         """
 
         for class_object in self.classes:
@@ -112,6 +116,11 @@ class ClassObject(object):
         self.call_tree = new_call_tree
 
     def ignore_functions(self, ignore_set):
+        """ Ignores all functions matching those specified in a pre-defined ignore set.
+
+         Args:
+            ignore_set (set): Functions whose calls should be removed (ignored) in the class call tree.
+        """
         new_call_tree = {}
         for caller, call_list in self.call_tree.iteritems():
             new_call_list = []
@@ -123,6 +132,11 @@ class ClassObject(object):
         self.call_tree = new_call_tree
 
     def namespace(self, relative_namespace):
+        """ Take the relative namespace for the class and prepend it to each item defined in the current class.
+
+        Args:
+            relative_namespace (string): Namespace to be prepended to each item in the call tree.
+        """
         new_call_tree = {}
         for caller in self.call_tree:
             new_call_tree[(relative_namespace, caller[0], caller[1])] = self.call_tree[caller]
@@ -205,6 +219,10 @@ class CallInspector(ast.NodeVisitor):
 
     Identifies `Name` nodes, which are called as ``name(args)``, and `Attribute` nodes, which are called as
     ``object.attr(args)``
+
+    Attributes:
+        module (string): Current module name on which the current call is made.
+        identifier (string): Name of the function called.
     """
     def __init__(self):
         self.module = ''
