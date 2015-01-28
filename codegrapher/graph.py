@@ -13,7 +13,9 @@ class Node(object):
     Optimized to handle nodes that represent functions in a program.
 
     Attributes:
-        tuple (tuple): Contains the namespace, class, and function name for the current node.
+        tuple (tuple): Contains the namespace, class, and function name for the current node. If namespace is an empty
+            string, this contains just the class and function names. If a string is provided to the constructor this
+            is a tuple containing just the function name.
     """
     def __init__(self, input_node):
         if isinstance(input_node, tuple):
@@ -88,6 +90,8 @@ class FunctionGrapher(object):
         Arguments:
             class_names (list): List of class names to be recognized by the graph as `class_name.__init__` nodes.
             dictionary (dict): `ClassObject.call_tree` dict to be added to graph nodes and edges.
+            relative_namespace (string): Relative namespace for the current class, i.e. where the current class is
+                located relative to the root, in dotted path notation.
         """
         # todo: better handle project hierarchy by looking at imports
         # add nodes
@@ -144,7 +148,8 @@ class FunctionGrapher(object):
                                     Node((relative_namespace, cls.name, fcn.name))))
 
     def render(self, name=None):
-        """ Renders the current graph.
+        """ Renders the current graph. `Graphviz <http://www.graphviz.org/>`_ must be installed for the graph to be
+            rendered.
 
         Arguments:
             name (string): filename to override `self.name`.
