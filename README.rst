@@ -56,6 +56,22 @@ To analyze a directory of files, along with all files it contains:
 
     codegrapher -r path/to/directory --output multiple_file_analysis
 
+And if you have a list of functions that aren't useful in your graph, add it to a `.cg_ignore` file:
+
+::
+
+    # cg_ignore file
+    # all lines beginning with '#' are ignored
+
+    # every function calls this, so it's not helpful in my graph:
+    log_error
+
+    # I don't want to see this in my graph:
+    parse
+    lower
+
+Then add the `--ignore` flag to your command. Using the flag `--remove-builtins` provides the same functionality
+for ignoring items found in `__builtins__`.
 
 As a Python module
 ~~~~~~~~~~~~~~~~~~
@@ -83,3 +99,6 @@ And then to add that code to a graph and render it (using graphviz):
 
 Which will produce your code as a png file, `name.gv.png`, along with a
 `dot file <http://en.wikipedia.org/wiki/DOT_%28graph_description_language%29>`_ `name.gv`
+
+More documentation for the Python module can be found at
+`Read the Docs <http://codegrapher.readthedocs.org/en/latest/>`_.
