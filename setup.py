@@ -16,7 +16,10 @@ setup(
         'click',
         'graphviz'
     ],
-    tests_require=['nose'],
+    tests_require=[
+        'nose',
+        'coverage'
+    ],
     entry_points='''
         [console_scripts]
         codegrapher=cli:cli
