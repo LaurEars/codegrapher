@@ -142,7 +142,7 @@ class StringCopier(object):
 
     @classmethod
     def print_hello(cls):
-        print "hello!"
+        print("hello!")
 '''
     parsed_code = ast.parse(code, filename='code.py')
     visitor = FileVisitor()
@@ -280,7 +280,7 @@ class DoSomething(object):
     visitor.visit(parsed_code)
     something_class = visitor.classes[1]
     echo(something_class.pprint())
-    print something_class.pprint()
+    print(something_class.pprint())
     assert ('DoSomething', 'something') in something_class.call_tree
     assert ('StringCopier',) in something_class.call_tree[('DoSomething', 'something')]
 
