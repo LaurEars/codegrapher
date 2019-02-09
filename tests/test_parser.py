@@ -173,7 +173,7 @@ class StringCopier(object):
     string_class_object = visitor.classes[0]
     assert ('StringCopier', '__init__') in string_class_object.call_tree
     assert ('set',) in string_class_object.call_tree[('StringCopier', '__init__')]
-    # from nose.tools import set_trace; set_trace()
+
     string_class_object.remove_builtins()
     eq_(string_class_object.call_tree[('StringCopier', '__init__')], [])
 
