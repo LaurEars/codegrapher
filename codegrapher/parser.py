@@ -1,10 +1,10 @@
-import os
 import ast
 import copy
+import os
 from pprint import pformat
 
 
-class FileObject(object):
+class FileObject:
     """Class for keeping track of files.
 
     Attributes:
@@ -68,7 +68,7 @@ class FileObject(object):
             class_object.namespace(self.relative_namespace)
 
 
-class ClassObject(object):
+class ClassObject:
     """Class for keeping track of classes in code.
 
     Attributes:
@@ -102,12 +102,8 @@ class ClassObject(object):
         """For many classes, we may not want to include builtin functions in the graph.
         Remove builtins from the call tree and from called functions list.
         """
-        new_call_tree = {}
-
-        for caller, call_list in self.call_tree.items():
-            new_call_tree[caller] = [call[0] for call in call_list if not hasattr(__builtins__, call[0])]
-
-        self.call_tree = new_call_tree
+        self.call_tree = {caller: [call for call in call_list if not self.is_builtin(call[0])]
+            for caller, call_list in self.call_tree.items()}
 
     def ignore_functions(self, ignore_set):
         """Ignores all functions matching those specified in a pre-defined ignore set.
@@ -144,6 +140,13 @@ class ClassObject(object):
         """
         return pformat(self.call_tree)
 
+    @staticmethod
+    def is_builtin(fn):
+        """Checks if a """
+        if isinstance(fn, str):
+            return fn in __builtins__
+        return False
+
     def __repr__(self):
         return "ClassObject {}".format(self.name)
 
@@ -152,7 +155,7 @@ class ClassObject(object):
         return "Class {}\nDefined functions: {}".format(self.name, functions)
 
 
-class FunctionObject(object):
+class FunctionObject:
     """Object that stores information within a single function definition
 
     attributes:
