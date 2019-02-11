@@ -1,13 +1,16 @@
 language: python
+
 python:
   - "3.6"
-  - "3.7"
-# install dependencies
+  - "3.7-dev"
+
+# install system dependencies
 before_install:
  - sudo apt-get install graphviz
 
+# install pip dependencies
 install:
  - make install-dev
 
-# command to run tests
+# execute tests
 script: make test
