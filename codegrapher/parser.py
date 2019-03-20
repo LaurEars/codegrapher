@@ -1,11 +1,11 @@
-import os
 import ast
 import copy
+import os
 from pprint import pformat
 
 
-class FileObject(object):
-    """ Class for keeping track of files.
+class FileObject:
+    """Class for keeping track of files.
 
     Attributes:
         modules (dict): dict of current modules with `alias: module_name`, `key:value pairs`.
@@ -29,7 +29,7 @@ class FileObject(object):
         self.ignore = set()
 
     def visit(self):
-        """ Visits all the nodes within the current file AST node.
+        """Visits all the nodes within the current file AST node.
 
         Updates `self.classes` for the current instance.
         """
@@ -41,13 +41,12 @@ class FileObject(object):
         self.namespace()
 
     def remove_builtins(self):
-        """ Removes builtins from each class in a `FileObject` instance.
-        """
+        """Removes builtins from each class in a `FileObject` instance."""
         for class_object in self.classes:
             class_object.remove_builtins()
 
     def add_ignore_file(self):
-        """ Use a file `.cg_ignore` to ignore a list of functions from the call graph
+        """Use a file `.cg_ignore` to ignore a list of functions from the call graph
         """
         if os.path.isfile('.cg_ignore'):
             with open('.cg_ignore', 'r') as ignore_file:
@@ -56,21 +55,21 @@ class FileObject(object):
                         self.ignore.add(line.strip())
 
     def ignore_functions(self):
-        """ Ignore all functions in the current class which are present in the instance's `ignore` attribute.
+        """Ignore all functions in the current class which are present in the instance's `ignore` attribute.
         """
         for class_object in self.classes:
             class_object.ignore_functions(self.ignore)
 
     def namespace(self):
-        """ Programmatically change the name of items in the call tree so they have relative path information
+        """Programmatically change the name of items in the call tree so they have relative path information
         """
 
         for class_object in self.classes:
             class_object.namespace(self.relative_namespace)
 
 
-class ClassObject(object):
-    """ Class for keeping track of classes in code.
+class ClassObject:
+    """Class for keeping track of classes in code.
 
     Attributes:
         modules (dict): dict of current modules with `alias: module_name`, `key:value pairs`.
@@ -90,39 +89,30 @@ class ClassObject(object):
         self.call_tree = {}
 
     def visit(self):
-        """ Visits all the nodes within the current class AST node.
+        """Visits all the nodes within the current class AST node.
 
         Updates `self.functions` and `self.call_tree` for the current instance.
         """
         function_visitor = FunctionVisitor(aliases=self.aliases, modules=self.modules)
         function_visitor.visit(self.node)
         self.functions = function_visitor.functions
-        self.call_tree = dict(((self.name, k), v) for k, v in function_visitor.calls.iteritems())
+        self.call_tree = dict(((self.name, k), v) for k, v in function_visitor.calls.items())
 
     def remove_builtins(self):
-        """ For many classes, we may not want to include builtin functions in the graph.
+        """For many classes, we may not want to include builtin functions in the graph.
         Remove builtins from the call tree and from called functions list.
         """
-        new_call_tree = {}
-        for caller, call_list in self.call_tree.iteritems():
-            new_call_list = []
-            for call in call_list:
-                if __builtins__.has_key(call[0]):
-                    continue
-                else:
-                    new_call_list.append(call)
-            new_call_tree[caller] = new_call_list
-
-        self.call_tree = new_call_tree
+        self.call_tree = {caller: [call for call in call_list if not self.is_builtin(call[0])]
+            for caller, call_list in self.call_tree.items()}
 
     def ignore_functions(self, ignore_set):
-        """ Ignores all functions matching those specified in a pre-defined ignore set.
+        """Ignores all functions matching those specified in a pre-defined ignore set.
 
          Args:
             ignore_set (set): Functions whose calls should be removed (ignored) in the class call tree.
         """
         new_call_tree = {}
-        for caller, call_list in self.call_tree.iteritems():
+        for caller, call_list in self.call_tree.items():
             new_call_list = []
             for call in call_list:
                 if call[-1] not in ignore_set:
@@ -132,7 +122,7 @@ class ClassObject(object):
         self.call_tree = new_call_tree
 
     def namespace(self, relative_namespace):
-        """ Take the relative namespace for the class and prepend it to each item defined in the current class.
+        """Take the relative namespace for the class and prepend it to each item defined in the current class.
 
         Args:
             relative_namespace (string): Namespace to be prepended to each item in the call tree.
@@ -143,12 +133,19 @@ class ClassObject(object):
         self.call_tree = new_call_tree
 
     def pprint(self):
-        """ Pretty print formatter for class object.
+        """Pretty print formatter for class object.
 
         Returns:
             string
         """
         return pformat(self.call_tree)
+
+    @staticmethod
+    def is_builtin(fn):
+        """Checks if a """
+        if isinstance(fn, str):
+            return fn in __builtins__
+        return False
 
     def __repr__(self):
         return "ClassObject {}".format(self.name)
@@ -158,8 +155,8 @@ class ClassObject(object):
         return "Class {}\nDefined functions: {}".format(self.name, functions)
 
 
-class FunctionObject(object):
-    """ Object that stores information within a single function definition
+class FunctionObject:
+    """Object that stores information within a single function definition
 
     attributes:
         modules: dict of current modules with `alias: module_name`, `key:value pairs`.
@@ -183,7 +180,7 @@ class FunctionObject(object):
 
     @classmethod
     def _extract_decorators(cls, node):
-        """ Pulls out strings for each item in a decorator list on a FunctionDef node
+        """Pulls out strings for each item in a decorator list on a FunctionDef node
 
         Args:
             node (:mod:`ast.AST`): Node from which `decorator_list` will be extracted
@@ -200,7 +197,7 @@ class FunctionObject(object):
         return decorator_list
 
     def visit(self):
-        """ Visits all the nodes within the current function object's AST node.
+        """Visits all the nodes within the current function object's AST node.
 
         Updates `self.calls`, `self.modules`, and `self.aliases` for the current instance.
         """
@@ -215,7 +212,7 @@ class FunctionObject(object):
 
 
 class CallInspector(ast.NodeVisitor):
-    """ Within a call, a Name or Attribute will provide the function name currently in use.
+    """Within a call, a Name or Attribute will provide the function name currently in use.
 
     Identifies `Name` nodes, which are called as ``name(args)``, and `Attribute` nodes, which are called as
     ``object.attr(args)``
@@ -240,7 +237,7 @@ class CallInspector(ast.NodeVisitor):
 
 
 class ImportVisitor(ast.NodeVisitor):
-    """ For import related calls, store the source modules and aliases used.
+    """For import related calls, store the source modules and aliases used.
     Designed to be inherited by other classes that need to know about imports in their current scope.
 
     Attributes:
@@ -267,9 +264,9 @@ class ImportVisitor(ast.NodeVisitor):
             self.aliases[asname] = item.name
             self.modules[asname] = module
 
-        
+
 class CallVisitor(ImportVisitor):
-    """ Finds all calls present in the current scope and inspect them.
+    """Finds all calls present in the current scope and inspect them.
 
     Attributes:
         call_names (set): set of :class:`CallInspector.identifier` items within current AST node.
@@ -327,7 +324,7 @@ class CallVisitor(ImportVisitor):
 
 
 class FunctionVisitor(ImportVisitor):
-    """ Function definitions are where the function is defined, and the call is where the ast for that function exists.
+    """Function definitions are where the function is defined, and the call is where the ast for that function exists.
 
     This only looks for items that are called within the scope of a function, and associates those items
     with the function.
@@ -355,7 +352,7 @@ class FunctionVisitor(ImportVisitor):
 
 
 class FileVisitor(ImportVisitor):
-    """ First visitor that should be called on the file level.
+    """First visitor that should be called on the file level.
 
     Attributes:
         classes (list): list of :class:`ClassObject` instances defined in the current file.
@@ -377,7 +374,7 @@ class FileVisitor(ImportVisitor):
         self.classes.append(new_class)
 
     def remove_builtins(self):
-        """ Removes builtins from each class in a `FileVisitor` instance.
+        """Removes builtins from each class in a `FileVisitor` instance.
         """
         for class_object in self.classes:
             class_object.remove_builtins()

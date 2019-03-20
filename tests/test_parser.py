@@ -1,12 +1,14 @@
 import ast
 
-from nose.tools import eq_
-from click.testing import CliRunner
 from click import echo
-
 from cli.script import cli
-from codegrapher.parser import FileVisitor
+from click.testing import CliRunner
+from nose.tools import eq_
 
+from codegrapher.parser import (
+    ClassObject,
+    FileVisitor
+)
 
 def test_import_visitor():
     function_string = '''import ast'''
@@ -142,7 +144,7 @@ class StringCopier(object):
 
     @classmethod
     def print_hello(cls):
-        print "hello!"
+        print("hello!")
 '''
     parsed_code = ast.parse(code, filename='code.py')
     visitor = FileVisitor()
@@ -280,7 +282,7 @@ class DoSomething(object):
     visitor.visit(parsed_code)
     something_class = visitor.classes[1]
     echo(something_class.pprint())
-    print something_class.pprint()
+    print(something_class.pprint())
     assert ('DoSomething', 'something') in something_class.call_tree
     assert ('StringCopier',) in something_class.call_tree[('DoSomething', 'something')]
 
@@ -334,3 +336,11 @@ StringCopier
         result = runner.invoke(cli, ['code.py', '--printed', '--remove-builtins'])
         eq_(result.exit_code, 0)
         eq_(result.output, code_result)
+
+
+def test_is_builtin():
+    assert ClassObject.is_builtin('set') is True
+
+
+def test_is_builtin_invalid():
+    assert ClassObject.is_builtin('StringCopier') is False
