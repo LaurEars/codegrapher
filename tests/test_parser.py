@@ -311,8 +311,8 @@ StringCopier
             f.write(code)
 
         result = runner.invoke(cli, ['code.py', '--printed'])
-        eq_(result.exit_code, 0)
-        eq_(result.output, code_result)
+        assert result.exit_code == 0
+        assert result.output == code_result
 
 
 def test_cli_printed_remove_builtins():
@@ -335,8 +335,8 @@ StringCopier
             f.write(code)
 
         result = runner.invoke(cli, ['code.py', '--printed', '--remove-builtins'])
-        eq_(result.exit_code, 0)
-        eq_(result.output, code_result)
+        assert result.exit_code == 0
+        assert result.output == code_result
 
 
 def test_is_builtin():
