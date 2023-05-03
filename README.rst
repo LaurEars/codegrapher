@@ -1,13 +1,13 @@
 codegrapher
 ===========
 
-.. image:: https://travis-ci.org/LaurEars/codegrapher.svg?branch=master
-    :target: https://travis-ci.org/LaurEars/codegrapher
+.. image:: https://github.com/LaurEars/codegrapher/actions/workflows/main.yaml/badge.svg
+    :target: https://github.com/LaurEars/codegrapher/actions/workflows/main.yaml/badge
 
 
 Code that graphs code
 ---------------------
-Uses the python `AST <https://docs.python.org/2/library/ast.html>`_ to parse Python source code and build a call graph.
+Uses the python `AST <https://docs.python.org/3/library/ast.html>`_ to parse Python source code and build a call graph.
 
 
 Output
