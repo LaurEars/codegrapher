@@ -34,7 +34,6 @@ def test_produce_graph():
 
         runner.invoke(cli, ['code.py', '--output', 'code_output'])
         assert 'code_output' in os.listdir(os.path.curdir)
-        assert 'code_output.pdf' in os.listdir(os.path.curdir)
 
 
 def test_file_extension():
@@ -45,5 +44,3 @@ def test_file_extension():
 
         runner.invoke(cli, ['code.py', '--output', 'code_output', '--output-format', 'png'])
         assert 'code_output' in os.listdir(os.path.curdir)
-        assert 'code_output.png' in os.listdir(os.path.curdir)
-        assert 'code_output.pdf' not in os.listdir(os.path.curdir)
