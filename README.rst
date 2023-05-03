@@ -14,8 +14,8 @@ Output
 ------
 An example of the current output of the parser parsing itself.
 
-.. image:: http://i.imgur.com/2VnLaL0.png
-    :target: http://i.imgur.com/2VnLaL0.png
+.. image:: docs/codegrapher.png
+    :target: docs/codegrapher.png
     :align: center
     :width: 100 %
     :alt: parser.py
