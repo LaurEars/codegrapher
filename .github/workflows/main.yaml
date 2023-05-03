@@ -22,7 +22,7 @@ jobs:
         pip install pytest-cov coverage
     - name: Test with pytest
       run:
-        pytest test_euler --doctest-modules --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+        pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:
