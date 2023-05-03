@@ -3,12 +3,13 @@ import ast
 from click import echo
 from cli.script import cli
 from click.testing import CliRunner
-from nose.tools import eq_
+
 
 from codegrapher.parser import (
     ClassObject,
     FileVisitor
 )
+
 
 def test_import_visitor():
     function_string = '''import ast'''
@@ -32,8 +33,8 @@ string2 = dc(string1)
     visitor.visit(parsed_code)
     assert 'dc' in visitor.modules
     assert 'dc' in visitor.aliases
-    eq_(visitor.modules['dc'], 'copy')
-    eq_(visitor.aliases['dc'], 'deepcopy')
+    assert visitor.modules['dc'] == 'copy'
+    assert visitor.aliases['dc'] == 'deepcopy'
 
 
 def test_import_deep_scope_dealiasing():
@@ -53,8 +54,8 @@ class StringCopier(object):
     string_class_object = visitor.classes[0]
     assert 'dc' in string_class_object.modules
     assert 'dc' in string_class_object.aliases
-    eq_(string_class_object.modules['dc'], 'copy')
-    eq_(string_class_object.aliases['dc'], 'deepcopy')
+    assert string_class_object.modules['dc'] == 'copy'
+    assert string_class_object.aliases['dc'] == 'deepcopy'
 
 
 def test_import_module_call_alias_only():
@@ -175,7 +176,7 @@ class StringCopier(object):
     assert ('set',) in string_class_object.call_tree[('StringCopier', '__init__')]
 
     string_class_object.remove_builtins()
-    eq_(string_class_object.call_tree[('StringCopier', '__init__')], [])
+    assert string_class_object.call_tree[('StringCopier', '__init__')] == []
 
 
 def test_class_object_ignore_functions():
