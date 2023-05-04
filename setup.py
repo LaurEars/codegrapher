@@ -17,7 +17,6 @@ setup(
         'graphviz'
     ],
     tests_require=[
-        'nose',
         'coverage'
     ],
     entry_points='''
