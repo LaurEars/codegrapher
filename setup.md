@@ -25,17 +25,14 @@ This produces a wheel and sdist in `dist/`.
 
 ## Publishing
 
-1. Verify the build:
-   ```bash
-   twine check dist/*
-   ```
+Publishing is automated via GitHub Actions using PyPI Trusted Publishing (OIDC — no stored tokens).
 
-2. Upload to TestPyPI first:
-   ```bash
-   twine upload --repository testpypi dist/*
-   ```
+To release a new version:
 
-3. Upload to PyPI:
-   ```bash
-   twine upload dist/*
-   ```
+1. Bump `version` in `pyproject.toml` and `codegrapher/__init__.py`
+2. Commit and merge to `main`
+3. Go to GitHub → Releases → Draft a new release
+4. Create a tag `v<version>` targeting `main` (e.g. `v0.3.0`)
+5. Fill in release notes and click Publish
+
+The `publish` workflow triggers automatically and deploys to PyPI.
