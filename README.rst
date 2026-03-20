@@ -2,7 +2,7 @@ codegrapher
 ===========
 
 .. image:: https://github.com/LaurEars/codegrapher/actions/workflows/main.yaml/badge.svg
-    :target: https://github.com/LaurEars/codegrapher/actions/workflows/main.yaml/badge
+    :target: https://github.com/LaurEars/codegrapher/actions/workflows/main.yaml
 
 
 Code that graphs code
