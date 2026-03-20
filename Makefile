@@ -1,10 +1,16 @@
-.PHONY: install test
+.PHONY: install install-dev test build check
 
 install:
-	pip install -r requirements.txt
+	uv sync
 
 install-dev:
-	pip install -r requirements-dev.txt
+	uv sync --extra dev
 
 test:
-	pytest
+	uv run pytest
+
+build:
+	uv build
+
+check:
+	twine check dist/*
