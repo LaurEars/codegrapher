@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "codegrapher"
+version = "0.3.0"
+description = "Code that graphs code"
+readme = "README.rst"
+license = {file = "LICENSE"}
+authors = [{name = "Laura Rupprecht"}]
+keywords = ["ast", "code", "graph", "call-graph", "graphviz", "documentation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Documentation",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "click>=7.0",
+    "graphviz>=0.4.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "coverage>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/LaurEars/codegrapher"
+Repository = "https://github.com/LaurEars/codegrapher"
+Issues = "https://github.com/LaurEars/codegrapher/issues"
+
+[project.scripts]
+codegrapher = "cli:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["codegrapher", "cli"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = ["--strict-markers", "--verbose"]
